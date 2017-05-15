@@ -3,4 +3,4 @@
 
 Home Screen
 
-https://github.com/MohamedElgendyGits/XYZReader/blob/master/Screenshot-1.png?raw=true
+![ScreenShot](https://raw.github.com/MohamedElgendyGits/XYZReader/master/Screenshot-1.png)
