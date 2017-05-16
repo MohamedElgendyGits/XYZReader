@@ -37,6 +37,12 @@ import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 
@@ -57,7 +63,7 @@ public class ArticleDetailFragment extends Fragment implements
     private int mDarkVibrantColor = 0xFF333333;
     private int mVibrantColor = 0xFF333333;
     private NestedScrollView mScrollView;
-    private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
+    //private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ColorDrawable mStatusBarColorDrawable;
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
 
@@ -133,6 +139,8 @@ public class ArticleDetailFragment extends Fragment implements
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) mRootView.findViewById(R.id.collapsing_toolbar);
+
+        /*
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout)
                 mRootView.findViewById(R.id.draw_insets_frame_layout);
         mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
@@ -140,7 +148,7 @@ public class ArticleDetailFragment extends Fragment implements
             public void onInsetsChanged(Rect insets) {
                 mTopInset = insets.top;
             }
-        });
+        });*/
 
         mScrollView = (NestedScrollView) mRootView.findViewById(R.id.scrollview);
 
@@ -198,21 +206,31 @@ public class ArticleDetailFragment extends Fragment implements
                             + mCursor.getString(ArticleLoader.Query.AUTHOR)
                             + "</font>"));
             bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY)));
+
             ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
                     .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
                         @Override
-                        public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
+                        public void onResponse(final ImageLoader.ImageContainer imageContainer, boolean b) {
                             Bitmap bitmap = imageContainer.getBitmap();
                             if (bitmap != null) {
-                                Palette p = Palette.generate(bitmap, 12);
-                                mDarkVibrantColor = p.getDarkVibrantColor(p.getDarkMutedColor(0xFF333333));
-                                mVibrantColor = p.getVibrantColor(p.getMutedColor(0xFF888888));
-                                mPhotoView.setImageBitmap(imageContainer.getBitmap());
-                                mRootView.findViewById(R.id.meta_bar)
-                                        .setBackgroundColor(mDarkVibrantColor);
-                                updateStatusBar();
-                                fab.setBackgroundTintList(ColorStateList.valueOf(mVibrantColor));
-                                mCollapsingToolbarLayout.setContentScrimColor(mVibrantColor);
+
+
+                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+
+                                    @Override
+                                    public void onGenerated(Palette p) {
+
+                                        mDarkVibrantColor = p.getDarkVibrantColor(p.getDarkMutedColor(0xFF333333));
+                                        mVibrantColor = p.getVibrantColor(p.getMutedColor(0xFF888888));
+                                        mPhotoView.setImageBitmap(imageContainer.getBitmap());
+                                        mRootView.findViewById(R.id.meta_bar)
+                                                .setBackgroundColor(mDarkVibrantColor);
+                                        updateStatusBar();
+                                        fab.setBackgroundTintList(ColorStateList.valueOf(mVibrantColor));
+                                        mCollapsingToolbarLayout.setContentScrimColor(mVibrantColor);
+
+                                    }
+                                });
                             }
                         }
 
@@ -221,6 +239,8 @@ public class ArticleDetailFragment extends Fragment implements
 
                         }
                     });
+
+
         } else {
             mRootView.setVisibility(View.GONE);
             titleView.setText("N/A");
